@@ -1,0 +1,71 @@
+﻿@page
+@model Practice.Pages.Persons.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Person[0].FullName)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Person)
+        {
+            <tr id="row-@item.Id">
+                <td>
+                    @Html.DisplayFor(modelItem => item.FullName)
+                </td>
+                <td>
+                    <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
+                    <button class="delete-btn" data-id="@item.Id">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $(".delete-btn").click(function (e) {
+                e.preventDefault();
+                var id = $(this).data("id");
+
+                if (!confirm("Вы уверены, что хотите удалить?")) return;
+
+                $.ajax({
+                    url: "/Persons/Index?handler=Delete",
+                    type: "POST",
+                    data: { id: id },
+                    headers: {
+                        "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            $("#row-" + id).fadeOut(500, function () {
+                                $(this).remove();
+                            });
+                        } else {
+                            alert("Ошибка при удалении!");
+                        }
+                    },
+                    error: function () {
+                        alert("Ошибка сервера!");
+                    }
+                });
+            });
+        });
+    </script>
+}
